@@ -1,0 +1,67 @@
+web:
+  image: droptica/nginx
+  volumes:
+    - ./app:/var/www
+    - ./docker/Configs/Nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+  links:
+    - mysql:mysql
+    - php:php-fpm
+  environment:
+    VIRTUAL_HOST: con.dev,www.con.dev
+
+php:
+  build: ./docker/Dockerfiles/php
+  #image: droptica/drupal-php-fpm:xdebug
+  links:
+    - mysql:mysql
+    - solr:solr
+    - redis:redis
+    - mailcatcher:mailcatcher
+  volumes:
+    - ./app:/var/www
+    - ./docker/Configs/Php/php_local.ini:/usr/local/etc/php/conf.d/php.ini:ro
+
+mysql:
+  image: mysql
+  volumes:
+    - ./docker/Data/database:/var/lib/mysql
+    - ./docker/custom_config/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+  environment:
+    MYSQL_ROOT_PASSWORD: 123
+    MYSQL_DATABASE: db
+    MYSQL_USER: user
+    MYSQL_PASSWORD: pass
+
+redis:
+  image: redis
+
+solr:
+  image: solr:6
+  volumes:
+    - ./docker/Data/Solr/:/opt/solr/server/solr/drupal/
+  ports:
+    - 8983:8983
+
+mongo:
+  image: mongo
+  volumes:
+    - ./docker/Data/mongodb:/data/db
+
+mongo-express:
+  image: mongo-express
+  links:
+    - mongo:mongo
+  ports:
+    - 8081:8081
+
+phpmyadmin:
+  image: nazarpc/phpmyadmin
+  links:
+    - mysql:mysql
+  environment:
+      VIRTUAL_HOST: phpmyadmin.con.dev
+
+mailcatcher:
+  image: droptica/mailcatcher
+  environment:
+    VIRTUAL_HOST: mails.con.dev
