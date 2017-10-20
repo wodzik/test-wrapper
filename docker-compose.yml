@@ -20,6 +20,7 @@ php:
   volumes:
     - ./app:/var/www
     - ./docker/Configs/Php/php_local.ini:/usr/local/etc/php/conf.d/php.ini:ro
+  working_dir: /var/www/web
 
 mysql:
   image: mysql
